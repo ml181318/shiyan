@@ -23,4 +23,7 @@ public class ShareController {
         return mv;
     }
 
+    public void say(){
+        System.out.println("你好呀");
+    }
 }
