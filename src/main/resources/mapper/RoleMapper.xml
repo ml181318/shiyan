@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mg.mapper.RoleMapper">
+    <select id="find" resultType="roles" parameterType="roles">
+        select * from role
+        <where>
+            <if test="rNo!=null and rNo!=''">
+                r_no = #{rNo}
+            </if>
+            <if test="rName!=null and rName!=''">
+                and r_name = #{rName}
+            </if>
+        </where>
+    </select>
+    <insert id="addRole" parameterType="roles">
+        insert into role values (null,#{rName},#{rDesc},1,2,3);
+    </insert>
+    <delete id="delRole">
+        delete from role where r_no=#{0}
+    </delete>
+</mapper>

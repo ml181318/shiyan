@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="static/css/amazeui.min.css">
+		<link rel="stylesheet" href="static/css/admin.css">
+<!--		<link rel="stylesheet" href="static/css/app.css">-->
+		<style>
+			.nu{
+				background-color: blue;
+				color: white;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="admin-content-body"style="" >
+			<div class="am-cf am-padding am-padding-bottom-0" >
+				<div class="am-fl am-cf"><strong class="am-text-primary am-text-lg">角色管理</strong><small></small></div>
+			</div>
+			<hr>
+			<div class="am-g">
+				<div class="am-u-sm-12 am-u-md-6">
+					<div class="am-btn-toolbar">
+						<div class="am-btn-group am-btn-group-xs">
+							<button type="button" class="am-btn am-btn-default btnAdd">
+									<span class="am-icon-plus"></span> 新增
+									</button>
+						</div>
+					</div>
+				</div>
+				<div class="am-u-sm-12 am-u-md-3">
+					<form th:action="@{/findRoleName}" method="post">
+						<div class="am-input-group am-input-group-sm">
+							<input name="rName" id="roleName" class="am-form-field" placeholder="请输入角色名称" type="text">
+							<span class="am-input-group-btn">
+								<button th:onclick="ajaxsel(1)" class="am-btn am-btn-default" type="button" id="btnsearch" style="outline: none">
+									搜索
+								</button>
+							</span>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="am-g" style="margin-top: 5px;">
+				<div class="am-u-sm-12">
+					<form class="am-form">
+						<table class="am-table am-table-striped am-table-hover table-main">
+							<thead>
+								<tr>
+									<th class="table-id">
+										<input id="chkAll" type="checkbox">
+									</th>
+
+									<th>
+										角色名称
+									</th>
+									<th class="table-title">
+										角色描述
+									</th>
+
+									<th class="table-set">
+										操作
+									</th>
+								</tr>
+							</thead>
+							<tbody id="tUser">
+								<tr th:if="${#lists.isEmpty(rlist)}">
+									<td colspan="4"><h1 style="color: red; text-align: center;">查询数据为空！</h1></td>
+								</tr>
+								<tr th:if="${not #lists.isEmpty(rlist)}" th:each="roles:${rlist}">
+									<td><input name="chks" value="701" type="checkbox"></td>
+									<td>
+										<a href="javascript:void(0)"><span th:text="${roles.rName}"></span></a>
+									</td>
+									<td th:text="${roles.rDesc}">拥有所有权限</td>
+									<td>
+										<div class="am-btn-toolbar">
+											<div class="am-btn-group am-btn-group-xs">
+												<button type="button" id="role_701" class="am-btn am-btn-default am-btn-xs am-text-secondary btnedit">
+													<span class="am-icon-pencil-square-o"></span> 编辑
+												</button>
+												<button type="button" onclick="sharesysfun(701);" class="am-btn am-btn-default am-btn-xs am-hide-sm-only">
+													<span class="am-icon-copy"></span> 分配权限
+												</button>
+												<a th:href="@{/delRoleId(rNo=${roles.rNo})}" class="am-btn am-btn-default am-btn-xs am-text-danger am-hide-sm-only" >
+													<span class="am-icon-trash-o"></span> 删除
+												</a>
+											</div>
+										</div>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						<div id="page" class="am-cf">
+							<div class="pa">共<span th:text="${page.total}"></span>条记录</div>
+							<div class="am-fr">
+								<ul class="am-pagination">
+									<!-- class="am-disabled" -->
+									<li>
+										<a th:onclick="ajaxsel([[${page.pageNum-1}]])">«</a>
+									</li>
+									<!-- class="am-active" -->
+									<li class="pnum" th:each="num:${page.navigatepageNums}">
+										<a th:onclick="ajaxsel([[${num}]])" th:if="${page.pageNum}==${num}" style="background-color: blue;color: white"><span th:text="${num}"></span></a>
+										<a th:onclick="ajaxsel([[${num}]])" th:if="${page.pageNum}!=${num}"><span th:text="${num}"></span></a>
+									</li>
+									<li>
+										<a th:onclick="ajaxsel([[${page.pageNum+1}]])">»</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		</div>
+		<!-- content end -->
+		</div>
+		</div>
+
+		<!--[if (gte IE 9)|!(IE)]><!-->
+		<script src="static/js/jquery-1.11.3.min.js"></script>
+		<!--<![endif]-->
+		<script type="text/javascript" src="static/myplugs/js/plugs.js"></script>
+		<script>
+			function ajaxsel(v){
+				$.ajax({
+					url:'/ajaxRole/ajaxRoleMapping',
+					type:'post',
+					data:{curPage:v,rName:$("#roleName").val()},
+					dataType:'json',
+					success:function (res) {
+						// alert(res.data.total)
+						//删除原表格内容
+						$("tbody").children().remove();
+						$(".pa").remove();
+						let page = '<div class="pa">共<span>'+res.data.total+'</span>条记录</div>' ;
+						$("#page div:first").before(page);
+						//删除上一页
+                        $("ul li:first").remove();
+						console.log(res.data.list);
+						//重新拼接上一页
+                        let prepage='<li>' +
+                            '<a onclick="ajaxsel('+(res.data.pageNum-1)+')">«</a>' +
+                            '</li>'
+                        //拼接完后添加到ul中
+                        $("ul:first-child").prepend(prepage);
+                        //删除下一页
+                        $("ul li:last").remove();
+                        //重新拼接上一页
+                        let lastpage='<li>' +
+                            '<a onclick="ajaxsel('+(res.data.pageNum+1)+')">»</a>' +
+                            '</li>'
+                        //拼接完后添加到ul中
+                        $("ul:last-child").append(lastpage);
+
+						let str='';
+						$.each(res.data.list,function (index,obj) {
+							// console.log(index)
+							if(res.data.total==0){
+								str+='<tr>' +
+										'<td colspan="4"><h1 style="color: red; text-align: center;">查询数据为空！</h1></td>' +
+										'</tr>'
+							}else{
+								str+='<tr>' +
+										'<td><input name="chks" value="701" type="checkbox"></td>' +
+										'<td>' +
+										'<a href="javascript:void(0)"><span>'+obj.rname+'</span></a>' +
+										'</td>' +
+										'<td><span>'+obj.rdesc+'</span></td>' +
+										'<td>' +
+										'<div class="am-btn-toolbar">' +
+										'<div class="am-btn-group am-btn-group-xs">' +
+										'<button type="button" id="role_701" class="am-btn am-btn-default am-btn-xs am-text-secondary btnedit">' +
+										'<span class="am-icon-pencil-square-o"></span> 编辑' +
+										'</button>' +
+										'<button type="button" onclick="sharesysfun(701);" class="am-btn am-btn-default am-btn-xs am-hide-sm-only">' +
+										'<span class="am-icon-copy"></span> 分配权限' +
+										'</button>' +
+										'<a href="/delRoleId?rNo='+obj.rno+'" class="am-btn am-btn-default am-btn-xs am-text-danger am-hide-sm-only" >' +
+										'<span class="am-icon-trash-o"></span> 删除' +
+										'</a>' +
+										'</div>' +
+										'</div>' +
+										'</td>' +
+										'</tr>';
+							}
+						});
+						$("tbody").append(str)
+						$("ul .pnum").remove();
+						let panum='';
+						$.each(res.data.navigatepageNums,function (index,o) {
+							// alert();
+							if(res.data.pageNum==o){
+								panum+='<li  class="pnum"><a style="background-color: blue;color: white" onclick="ajaxsel('+o+')">' +
+										'<span >'+o+'</span>' +
+										'</a></li>'
+							}else{
+								panum+='<li  class="pnum"><a onclick="ajaxsel('+o+')">' +
+										'<span >'+o+'</span>' +
+										'</a></li>'
+							}
+
+						});
+						$("ul li:first").after(panum);
+					}
+				})
+			}
+			$(function() {
+				 $("#chkAll").chkAll({
+				 });
+				$(".btnedit").click(function() {
+
+					$.jq_Panel({
+						title: "修改角色",
+						iframeWidth: 500,
+						iframeHeight: 300,
+						url: "/editRole"
+					});
+				});
+
+				$(".btnAdd").click(function() {
+
+					$.jq_Panel({
+						title: "添加角色",
+						iframeWidth: 500,
+						iframeHeight: 300,
+						url: "/addRole"
+					});
+
+				});
+			});
+
+			function sharesysfun(id) {
+				location.href = "/share/shareInfo";
+			}
+		</script>
+	</body>
+
+</html>

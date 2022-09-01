@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mg.mapper.MainMenuMapper">
+    <select id="find" resultType="mainmenu" resultMap="ms">
+        select * from mainMenu m
+        inner join sonMenu s on m.m_no = s.m_no
+        left join sharerole sh on s.s_no = sh.s_no
+    </select>
+    <resultMap id="ms" type="mainmenu">
+        <id property="mNo" column="m_no" />
+        <result property="mName" column="m_name" />
+        <collection property="lists" ofType="sonmenu">
+            <id property="sNo" column="s_no" />
+            <result property="sName" column="s_name" />
+        </collection>
+        <collection property="listsr" ofType="sharerole">
+            <result property="mNo" column="m_no" />
+            <result property="sNo" column="s_no" />
+        </collection>
+    </resultMap>
+</mapper>
