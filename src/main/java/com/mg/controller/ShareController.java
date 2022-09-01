@@ -26,4 +26,8 @@ public class ShareController {
     public void say(){
         System.out.println("你好呀");
     }
+
+    public void sing(){
+        System.out.println("wobuhao");
+    }
 }
